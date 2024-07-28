@@ -4,26 +4,28 @@ tags:
     - arbori de intervale
 ---
 
-În unele probleme, avem nevoie de structuri de date care să ne dea posibilitatea de a accesa stări din trecut.
+**Autor**: Luca Valentin Mureșan
 
 ## Introducere
 
-!!! info "Definiție" 
+În unele probleme, avem nevoie de structuri de date care să ne dea posibilitatea de a accesa stări din trecut.
+
+!!! info "Definiție"
     Arborele de intervale persistent este o structură de date care ne dă posibilitatea de a accesa versiuni din trecut.
 
 ## Problema clasică
 
 Să se implementeze o structură de date care rezolvă **online** următoarea problemă:
 
-Se dă $N, Q$, un șir $a_1, a_2, \dots a_N$ de numere întregi. Să se răspundă la $Q$ interogări de două tipuri:
+Se dă $N, Q$, un șir $a_1$, $a_2$, ..., $a_N$ de numere întregi. Să se răspundă la $Q$ interogări de două tipuri:
 
-$1.$ Se dă $p, x$. $a_p$ devine $x$ ($1 \leq p \leq N$)
+1. Se dă $p, x$. $a_p$ devine $x$ ($1 \leq p \leq N$)
 
-$2.$ Se dă $l, r, t$. Află $a_l + a_{l+1} + \dots + a_r$ după a $t$-a operație de tipul 1.
+2. Se dă $l, r, t$. Află $a_l + a_{l+1} + \dots + a_r$ după a $t$-a operație de tipul 1.
 
 $N, Q \leq 200 \ 000$
 
-## Soluție
+### Soluție
 
 Observăm că dacă am avea $t = $ numărul de operații de tipul $1$ (adică dacă nu ar trebui să răspundem la întrebări din trecut), am putea doar să folosim un arbore de intervale.
 
@@ -36,7 +38,6 @@ Pentru claritate, vom folosi o implementare cu pointeri.
 
 Complexitate Timp: $O(N + Q \cdot \log_2 N)$
 Complexitate Memorie: $O(N + Q \cdot \log_2 N)$ deoarece pentru fiecare interogare de tip $1$, trebuie să creem $O(\log_2 N)$ noduri noi.
-
 
 ```cpp
 typedef long long ll;
@@ -60,7 +61,8 @@ Node* build(int tl, int tr, int* a) {
   if (tl == tr) {
     return new Node {
       a[tl - 1],
-      NULL, NULL
+      nullptr, 
+      nullptr
     };
   } else {
     int mid = (tl + tr) / 2;
@@ -76,8 +78,8 @@ Node* update(const Node* node, int tl, int tr, int p, int v) {
   if (tl == tr) {
     return new Node {
       v,
-      NULL,
-      NULL
+      nullptr,
+      nullptr
     };
   } else {
     Node *ret = new Node();
@@ -101,7 +103,8 @@ void init(int _n, int* a) {
 }
 
 void updateValue(int pos, int value) {
-  versions.push_back(update(versions.back(), 1, n, pos, value)); // creem o versiune nouă, pornim inițial cu versiunea trecută
+  // creem o versiune nouă, pornim inițial cu versiunea trecută
+  versions.push_back(update(versions.back(), 1, n, pos, value)); 
 }
 
 ll sequenceQuery(int l, int r, int t) {
@@ -112,7 +115,7 @@ ll sequenceQuery(int l, int r, int t) {
 !!! info "Atenție!"
     Arborele de interval persistent nu poate fi folosit cu lazy propagation, deoarece nu știm pentru fiecare nod când se modifică.
 
-# Problema History
+## Problema History
 
 Această problemă este foarte asemănătoare cu problema precedentă, dar în loc să răspundem la interogări de forma "care e suma valorilor din această subsecvență?", treubie să răspundem la întrebări de forma "care e suma maximă a unei subsecvențe incluse în această subsecvență?".
 
@@ -129,11 +132,8 @@ struct Node {
   Node* l;
   Node* r;
   Node() {}
-  Node(int x) {
-    sum = value = prefmax = suffmax = x;
-    l = r = NULL;
-  }
-  Node operator + (const Node &other) const {
+  Node(int x) : sum(x), value(x), prefmax(x), suffmax(x), l(nullptr), r(nullptr) {}
+  Node operator+ (const Node &other) const {
     Node ret;
     ret.sum = sum + other.sum;
     ret.prefmax = std::max(prefmax, sum + other.prefmax);
@@ -156,10 +156,7 @@ struct PST {
   PST() {}
   Node* build(int tl, int tr) {
     if (tl == tr) {
-      int x;
-      x = readNumber();
-      Node* ret = new Node(x);
-      return ret;
+      return new Node(readNumber());
     } else {
       int mid = (tl + tr) / 2;
       Node* ret = new Node(0);
@@ -174,8 +171,7 @@ struct PST {
   }
   Node* update(Node* node, int tl, int tr, int p, int x) {
     if (tl == tr) {
-      Node* ret = new Node(x);
-      return ret;
+      return new Node(x);
     } else {
       int mid = (tl + tr) / 2;
       Node* ret = new Node();
@@ -226,15 +222,15 @@ long long querySequence(int l, int r, int t) {
 }
 ```
 
-# Probleme suplimentare
+## Probleme suplimentare
 
 * [History](https://kilonova.ro/problems/2029)
 * [Range Queries and Copies](https://cses.fi/problemset/task/1737)
 * [Two currencies](https://oj.uz/problem/view/JOI23_currencies)
+* [The Classic Problem](https://codeforces.com/problemset/problem/464/E)
 * [Teams](https://oj.uz/problem/view/IOI15_teams)
 
-
-## Lectură suplimentară 
+## Lectură suplimentară
 
 * [Minimum Spanning Tree - USACO Guide](https://usaco.guide/gold/mst?lang=cpp)
 * [Minimum spanning tree - Prim's algorithm](https://cp-algorithms.com/graph/mst_prim.html)
